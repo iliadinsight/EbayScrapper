@@ -30,7 +30,11 @@ class proxy_runner:
             
             # Catch Timeout Errors and print all others to console
             except requests.exceptions.Timeout as e:
-                print('Failed. Moving onto next proxy...')
+                print('\t Proxy Timed out. Moving onto next proxy...')
+                self.next_proxy()
+
+            except requests.exceptions.ProxyError as e:
+                print('\t Couldn\'t connect to proxy. Moving onto next proxy...')
                 self.next_proxy()
 
             except Exception as e:
@@ -40,43 +44,24 @@ class proxy_runner:
     def run(self):
         
         scrape = True
-        
-        counter = 0
+
         while scrape:
             
-            next_proxy = False
-            counter+=1
-            
             print(f'Sending Request with proxy {self.proxy}... ')
-            
-            try:
-                response = self.make_request(method='get',url=self.url,proxies={'https':self.proxy},timeout=5)
-                
-                if response.status_code==200:
-                    #print("Success!")
-                    
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    output_df,name = self.scraper(soup)
-                    filename = name+'-'+datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
-                    output_df.to_json(f'{filename}.json',orient='records')
-                    
-                    print('Success Sleeping for 30min now..')
-                    return soup
-                    break
-                    # Sleep for 30 minutes before next request
-                    time.sleep(1800)
-                else:
-                    next_proxy=True
 
-            except Exception as e:
-                print(f'\t failed with Error code \"{e}\"')
-                next_proxy=True
+            response = self.make_request(method='get',url=self.url,proxies={'https':self.proxy},timeout=5)
                 
-            if next_proxy:
-                try:
-                    check = self.next_proxy()
-                except:
-                    scrape = False
-                    print("Tried all proxies. Now exiting.")
+            if response.status_code==200:
+                
+                soup = BeautifulSoup(response.content, 'html.parser')
+                output_df,name = self.scraper(soup)
+                filename = name+'-'+datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+                output_df.to_json(f'./Data/{filename}.json',orient='records')
+                
+                print('Success Sleeping for 30min now..')
+                return soup
+                break
+                # Sleep for 30 minutes before next request
+                time.sleep(1800)
                     
             time.sleep(1)
