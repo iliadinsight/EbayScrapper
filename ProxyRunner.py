@@ -43,6 +43,11 @@ class proxy_runner:
                 self.next_proxy()
                 time.sleep(1)
 
+            except requests.exceptions.ConnectionError as e:
+                print(f'\t {e}. \n\t Moving onto next proxy...')
+                self.next_proxy()
+                time.sleep(1)
+
             
             
     def run(self):
