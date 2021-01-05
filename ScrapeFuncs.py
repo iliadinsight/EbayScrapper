@@ -1,4 +1,4 @@
-import requests, json, time, pandas as pd
+import requests, json, time, pandas as pd, os
 from datetime import datetime
 from bs4 import BeautifulSoup
 from collections import defaultdict
@@ -45,43 +45,51 @@ def find_item(listing,find_key,find_attrs):
         item = None
     return item
     
-    
-def ScrapeNewListing(soup):
-    
-    data_dict = defaultdict(list)
-    listings = soup.findAll('li')
-    
+
+def get_listings(soup,exectime):
+
+    listings = soup.findAll('li',attrs={'class':'s-item s-item--watch-at-corner'})
+    data = dict()
+    data = defaultdict(list)
+
     for listing in listings:
-        prod_name=" "
-        prod_price = " "
-        for name in listing.find_all('h3', attrs={'class':"s-item__title"}):
-            if(str(name.find(text=True, recursive=False))!="None"):
-                prod_name=str(name.find(text=True, recursive=False))
-                #item_name.append(prod_name)
 
-                data_dict['listing name'].append(prod_name)
+        title = listing.find('h3',attrs={'class':'s-item__title'})
+        title = str(title.find(text=True, recursive=False))
+        data['Title'].append(title)
 
-        if(prod_name!=" "):
-            price = find_item(listing,'span',{'class':'s-item__price'})
-            data_dict['price'].append(price)
+        listing_url = listing.find('a',attrs={'class':'s-item__link'}).get('href')
+        data['url_link'].append(listing_url)
 
-            postage = find_item(listing,'span',{'class':'s-item__shipping s-item__logisticsCost'})
-            data_dict['postage'].append(postage)
+        price = find_item(listing,'span',{'class':'s-item__price'})
+        data['price'].append(price)
 
-            listing_date = find_item(listing,'span',{'class':'s-item__dynamic s-item__listingDate'})
-            data_dict['listing_date'].append(listing_date)
+        postage = find_item(listing,'span',{'class':'s-item__shipping s-item__logisticsCost'})
+        data['postage'].append(postage)
 
-            country = find_item(listing,'span',{'class':'s-item__location s-item__itemLocation'})
-            data_dict['country'].append(country)
+        listing_date = find_item(listing,'span',{'class':'s-item__dynamic s-item__listingDate'})
+        data['listing_date'].append(listing_date)
 
-            buying_option = find_item(listing,'span',{'class':'s-item__purchase-options-with-icon'})
-            data_dict['buying_option'].append(buying_option)
+        country = find_item(listing,'span',{'class':'s-item__location s-item__itemLocation'})
+        data['country'].append(country)
 
-            # Maybe link this to the get request instead of creating a timestamp here
-            scraping_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            data_dict['scraping_time'].append(scraping_time)
-            
-    return pd.DataFrame(data_dict),'new-listings'
+        buying_option = find_item(listing,'span',{'class':'s-item__purchase-options-with-icon'})
+        data['buying_option'].append(buying_option)
+
+        # Maybe link this to the get request instead of creating a timestamp here
+        scraping_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data['scraping_time'].append(scraping_time)
+    
+    # Savings outputs
+    filename = 'listings-'+ datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+    
+    try:
+        os.makedirs(f'./Data/{exectime}/')
+        pd.DataFrame(data).to_csv(f'./Data/{exectime}/{filename}.csv')
+
+    except OSError as e:
+        pd.DataFrame(data).to_csv(f'./Data/{exectime}/{filename}.csv')
+
 
 def save_json(obj,filename):
     with open(filename,'w') as file:
