@@ -82,13 +82,14 @@ def get_listings(soup,exectime):
     
     # Savings outputs - slightly convoluted use of os package is needed so that this logic works in both windows and linux
     current_path = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(current_path,f'Data/{exectime}')
+    data_dir_0 = os.path.join(current_path,'Data')
+    data_dir_1 = os.path.join(data_dir_0,f'run-{exectime}')
 
-    filename = 'listings-'+ datetime.now().strftime('%Y-%m-%d-%H:%M:%S') + '.csv'
-    filepath = os.path.join(data_dir,filename)
+    filename = 'listings-'+ datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+    filepath = os.path.join(data_dir_1,filename)
     
     try:
-        os.makedirs(data_dir)
+        os.makedirs(data_dir_1)
         pd.DataFrame(data).to_csv(filepath)
 
     except OSError as e:

@@ -10,7 +10,7 @@ class proxy_runner:
         self.proxy = next(self.proxies)
         self.url = url
         self.scraper = scraper
-        self.exectime = datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+        self.exectime = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     
         
     def next_proxy(self):
@@ -66,5 +66,8 @@ class proxy_runner:
 
                     print('\t Success Sleeping for 15min now..')
                     time.sleep(900)
+                elif response.status_code==403:
+                    print('\t proxy forbidden from ebay. Moving onto next proxy')
+                    self.next_proxy()
                 else:
                     print(response)
