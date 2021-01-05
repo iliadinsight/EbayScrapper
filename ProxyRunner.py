@@ -11,34 +11,33 @@ class proxy_runner:
         self.url = url
         self.scraper = scraper
         self.exectime = datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+    
         
     def next_proxy(self):
         ''' Fetch the next proxy. Once empty raise an Exeption to end the process.'''
         try:
             next_proxy = next(self.proxies)
             self.proxy = next_proxy
-        
         except:
             self.proxy = None
     
-    def make_request(self,**kwargs):
-        ''' Make a Request. If unsuccesful try the next proxy.'''
 
-        if self.proxy!=None:
+    def make_request(self,**kwargs):
+
+        while (self.proxy is not None):
+
+            valid_proxy = self.proxy is not None
             try:
                 response = requests.request(**kwargs)
                 return response
 
             except requests.exceptions.ProxyError as e:
-                print('\t Couldn\'t connect to proxy. Moving onto next proxy...')
+                print(f'\t {e}. \n\t Moving onto next proxy...')
                 self.next_proxy()
-                return None
             
-            # Catch Timeout Errors and iterate proxy forward, otherwise raise an error.
             except requests.exceptions.Timeout as e:
-                print('\t Proxy Timed out. Moving onto next proxy...')
+                print(f'\t {e}. \n\t Moving onto next proxy...')
                 self.next_proxy()
-                return None
             
             
     def run(self):
