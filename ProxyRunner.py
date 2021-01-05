@@ -33,22 +33,10 @@ class proxy_runner:
                 response = requests.request(**kwargs)
                 return response
 
-            except requests.exceptions.ProxyError as e:
+            except requests.RequestException as e:
                 print(f'\t {e}. \n\t Moving onto next proxy...')
                 self.next_proxy()
                 time.sleep(1)
-            
-            except requests.exceptions.Timeout as e:
-                print(f'\t {e}. \n\t Moving onto next proxy...')
-                self.next_proxy()
-                time.sleep(1)
-
-            except requests.exceptions.ConnectionError as e:
-                print(f'\t {e}. \n\t Moving onto next proxy...')
-                self.next_proxy()
-                time.sleep(1)
-
-            
             
     def run(self):
         
@@ -65,7 +53,7 @@ class proxy_runner:
                     self.scraper(soup,self.exectime)
 
                     print('\t Success Sleeping for 15min now..')
-                    time.sleep(900)
+                    time.sleep(5)
                 elif response.status_code==403:
                     print('\t proxy forbidden from ebay. Moving onto next proxy')
                     self.next_proxy()
