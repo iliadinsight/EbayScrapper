@@ -80,15 +80,19 @@ def get_listings(soup,exectime):
         scraping_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         data['scraping_time'].append(scraping_time)
     
-    # Savings outputs
-    filename = 'listings-'+ datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+    # Savings outputs - slightly convoluted use of os package is needed so that this logic works in both windows and linux
+    current_path = os.path.abspath(os.path.dirname(__file__))
+    data_dir = os.path.join(current_path,f'Data/{exectime}')
+
+    filename = 'listings-'+ datetime.now().strftime('%Y-%m-%d-%H:%M:%S') + '.csv'
+    filepath = os.path.join(data_dir,filename)
     
     try:
-        os.makedirs(f'./Data/{exectime}/')
-        pd.DataFrame(data).to_csv(f'./Data/{exectime}/{filename}.csv')
+        os.makedirs(data_dir)
+        pd.DataFrame(data).to_csv(filepath)
 
     except OSError as e:
-        pd.DataFrame(data).to_csv(f'./Data/{exectime}/{filename}.csv')
+        pd.DataFrame(data).to_csv(filepath)
 
 
 def save_json(obj,filename):

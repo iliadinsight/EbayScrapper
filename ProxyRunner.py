@@ -28,16 +28,21 @@ class proxy_runner:
 
             valid_proxy = self.proxy is not None
             try:
+                t_request = datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+                print(f'[{t_request}] Sending Request with proxy {self.proxy}... ')
                 response = requests.request(**kwargs)
                 return response
 
             except requests.exceptions.ProxyError as e:
                 print(f'\t {e}. \n\t Moving onto next proxy...')
                 self.next_proxy()
+                time.sleep(1)
             
             except requests.exceptions.Timeout as e:
                 print(f'\t {e}. \n\t Moving onto next proxy...')
                 self.next_proxy()
+                time.sleep(1)
+
             
             
     def run(self):
@@ -45,9 +50,6 @@ class proxy_runner:
         scrape = True
 
         while scrape:
-
-            t_request = datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
-            print(f'[{t_request}] Sending Request with proxy {self.proxy}... ')
 
             response = self.make_request(method='get',url=self.url,proxies={'https':self.proxy},timeout=10)
             
